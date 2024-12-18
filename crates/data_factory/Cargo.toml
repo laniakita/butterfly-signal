@@ -1,8 +1,13 @@
 [package]
 name = "data_factory"
+authors = ["Lani Akita"]
+description = "Wasm package that assembles data into useful JS objects."
+license = "MIT"
+repository = "https://github.com/laniakita/butterfly-signal"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
 crate-type = ["cdylib", "rlib"]
 
 [features]
