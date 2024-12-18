@@ -1,0 +1,9 @@
+
+[workspace]
+resolver = '2'
+members = [
+	'crates/data_factory',
+]
+
+[profile.release]
+lto = true
