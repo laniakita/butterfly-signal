@@ -12,8 +12,10 @@
     "svelte": "^5.8.1"
   },
   "devDependencies": {
+    "@atproto/api": "^0.13.21",
     "@rsbuild/core": "^1.1.8",
     "@rsbuild/plugin-svelte": "^1.0.5",
+    "chrome-types": "^0.1.325",
     "svelte-check": "^4.1.1",
     "typescript": "^5.7.2"
   }
