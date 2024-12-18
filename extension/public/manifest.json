@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/chrome-manifest",
-  "name": "butterfly-signal",
+  "name": "Butterfly Signal",
   "description": "An extension that illuminates a butterfly, when it detects an active web page that has it's domain registered on Bluesky.",
   "version": "0.0.1",
   "manifest_version": 3,
