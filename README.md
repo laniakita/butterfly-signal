@@ -1,4 +1,4 @@
-# Project Shiny Butterfly
+# Butterfly Signal
 
 This is a browser extension that illuminates a butterfly when you visit a webpage that has it's domain registered on Bluesky. 
 
