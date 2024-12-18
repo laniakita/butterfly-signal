@@ -1,4 +1,4 @@
-# Project Shiny Butterfly
+# Butterfly Signal
 
 This is a browser extension that illuminates a butterfly when you visit a webpage that has it's domain registered on Bluesky. The main libraries are written in Rust then compiled into Web Assembly for speed and cross-compatibility.
 
@@ -38,10 +38,11 @@ Until this is made available on the chrome webstore (or whereever you get browse
 
 ### The Hardway
 
-#### Prerequisites:
-0. Install required libraries into your environment: 
-   - **Rust:** rustc, rustup, and cargo
-   - **JS:** nodejs, bun.sh
+>#### Prerequisites:
+>
+>0. Install required libraries into your environment: 
+>   - **Rust:** rustc, rustup, and cargo
+>   - **JS:** nodejs, bun.sh
 
 1. Fork this repo
 2. After you've made some changes, create a pull request to merge your changes into master. In the description, be sure to detail what you've changed or added, as well as your motivation for doing so.
