@@ -28,9 +28,9 @@ Until this is made available on the chrome webstore (or whereever you get browse
 >#### Prerequisites:
 >
 >0. Install the Nix package manager (if you're not already using NixOS or NixOS-WSL). 
->   - [MacOS (Darwin)](https://nixos.org/download/#nix-install-macos)
->   - [Linux](https://nixos.org/download/#nix-install-linux)
->   - [Windows (WSL)](https://nixos.org/download/#nix-install-windows)
+>    - [MacOS (Darwin)](https://nixos.org/download/#nix-install-macos)
+>    - [Linux](https://nixos.org/download/#nix-install-linux)
+>    - [Windows (WSL)](https://nixos.org/download/#nix-install-windows)
 
 1. Fork this repo
 2. Run `nix develop` to immediately have access to all the same libraries/versions.
@@ -41,8 +41,8 @@ Until this is made available on the chrome webstore (or whereever you get browse
 >#### Prerequisites:
 >
 >0. Install required libraries into your environment: 
->   - **Rust:** rustc, rustup, and cargo
->   - **JS:** nodejs, bun.sh
+>    - **Rust:** rustc, rustup, and cargo
+>    - **JS:** nodejs, bun.sh
 
 1. Fork this repo
 2. After you've made some changes, create a pull request to merge your changes into master. In the description, be sure to detail what you've changed or added, as well as your motivation for doing so.
