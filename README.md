@@ -22,12 +22,7 @@ Until this is made available on the chrome webstore (or whereever you get browse
 
 ## Contributing
 
->### Prerequisites:
->
->0. Install the Nix package manager (if you're not already using NixOS or NixOS-WSL). 
->   - [MacOS (Darwin)](https://nixos.org/download/#nix-install-macos)
->   - [Linux](https://nixos.org/download/#nix-install-linux)
->   - [Windows (WSL)](https://nixos.org/download/#nix-install-windows)
+### For Developers Using Nix/NixOS
 
 1. Fork this repo
 2. Run `nix develop` to immediately have access to all the same libraries/versions.
