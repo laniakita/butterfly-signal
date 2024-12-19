@@ -217,17 +217,21 @@ async function hasAtProtoRecord(key: string): Promise<boolean> {
   }
 }
 
-async function handleCached(
-  key: string,
-  hasRec: boolean
-): Promise<MiniProfile> {
+async function handleCached(key: string): Promise<MiniProfile> {
   const cachedProfileRes = await getCachedProfile(key);
+
+  /**
+   * this way, we only do our network fetches (dns, atproto api) if we need to:
+   *   1. when we've never seen this "key" before
+   *   2. when the data is stale
+   */
 
   if (!cachedProfileRes) {
     CONFIG.DEBUG &&
       console.log(
         `[info]: cached data not found for ${key} ... first time, huh? ;)`
       );
+    const hasRec = await hasAtProtoRecord(key);
     return await handleMiniProfileUpdate(key, hasRec);
   }
 
@@ -239,6 +243,7 @@ async function handleCached(
       console.log(
         `[info]: ${tDelta}s > ${CONFIG.REVALIDATE}s -> profile data stale -> Revalidating cache`
       );
+    const hasRec = await hasAtProtoRecord(key);
     return await handleMiniProfileUpdate(key, hasRec);
   }
 
@@ -256,38 +261,23 @@ export async function mainHandler() {
 
     const key = await handleKey();
     // very important!
-    if (!key) throw new Error("Key is undefined!");
+    if (key) {
+      // check cache
+      const profileData = await handleCached(key);
 
-    const hasRec = await hasAtProtoRecord(key);
+      if (profileData?.handle !== null) {
+        updateIcon({ isActive: true });
+        CONFIG.DEBUG && console.log("[success]: BskyData update complete");
+        return profileData;
+      }
 
-    // check cache
-    const profileData = await handleCached(key, hasRec);
-
-    if (profileData?.handle !== null) {
-      updateIcon({ isActive: true });
-      CONFIG.DEBUG && console.log("[success]: BskyData update complete");
+      updateIcon({ isActive: false });
+      if (CONFIG.DEBUG) console.log("[success]: null update complete");
       return profileData;
     }
-
-    updateIcon({ isActive: false });
-    if (CONFIG.DEBUG) console.log("[success]: null update complete");
-    return profileData;
-
   } catch (err) {
     if (err instanceof ButterflySignalError) {
-      switch (err.name) {
-        case "404_DNS_QUERY_ERROR":
-          console.warn(err.messageGen());
-          break;
-        case "ATPROTO_GET_ERROR":
-          console.warn(err.messageGen());
-          break;
-        case "INVALID_KEY_ERROR":
-          console.warn(err.messageGen());
-          break;
-        default:
-          console.error(err.messageGen());
-      }
+      console.warn(err.messageGen());
     } else {
       console.error(err);
     }
