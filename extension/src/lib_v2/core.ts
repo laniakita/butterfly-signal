@@ -21,9 +21,15 @@
  */
 
 import { agent } from "./bsky/api";
-import { getChromeKV, getCurrentTab } from "./chrome-utils";
+import {
+  getChromeKV,
+  getCurrentTab,
+  setChromeKV,
+  updateIcon,
+} from "./chrome-utils";
 import { fetchRecord, hostnameFromUrl } from "./dns";
-import { to_mini_profile } from '../../../crates/data_factory/pkg/data_factory';
+import { to_mini_profile } from "../../../crates/data_factory/pkg/data_factory";
+import { CONFIG } from "./config";
 
 type ErrorName =
   | "INVALID_KEY_ERROR"
@@ -51,10 +57,11 @@ export class ButterflySignalError extends Error {
   }
 
   public messageGen(): string {
-    const message = `[${this.name}]: ${this.message}. ${this.cause ? `${this.cause}.` : ''}`;
-    return message
+    const message = `[${this.name}]: ${this.message}. ${
+      this.cause ? `${this.cause}.` : ""
+    }`;
+    return message;
   }
-
 }
 
 async function keyFromTab(): Promise<string | undefined> {
@@ -73,11 +80,34 @@ async function keyFromTab(): Promise<string | undefined> {
   }
 }
 
-export async function getCachedProfile(key: string) {
+type MiniProfile = {
+  avatar: string | null;
+  banner: string | null;
+  description: string | null;
+  displayName: string | null;
+  handle: string | null;
+  updated: Date;
+  url: string | null;
+};
+
+const nullMiniProfile: MiniProfile = {
+  avatar: null,
+  banner: null,
+  description: null,
+  displayName: null,
+  handle: null,
+  updated: new Date(),
+  url: null,
+};
+
+async function getCachedProfile(
+  key: string | undefined
+): Promise<MiniProfile | undefined> {
   try {
-    const cachedRes = await getChromeKV(key);
+    if (!key) throw new Error("Key is undefined!");
+    const cachedRes = (await getChromeKV(key)) as unknown as string;
     if (cachedRes) {
-      return cachedRes;
+      return JSON.parse(cachedRes);
     }
     return undefined;
   } catch (err) {
@@ -85,57 +115,174 @@ export async function getCachedProfile(key: string) {
   }
 }
 
-export async function mainHandler() {
+async function getBskyProfile(handle: string) {
   try {
-    console.log("test main function");
-    const key = await keyFromTab();
-    console.log(key);
-
-    // check if key is valid
-    if (!key || (key && key.split(".").length <= 1)) {
-      throw new Error(`[400]: Oops ${key} is not a valid key!`);
-    }
-
-    const subdomain = "_atproto";
-    const atProtoRes = await fetchRecord({ subdomain, hostname: key });
-    console.log(atProtoRes);
-    if (!atProtoRes?.Answer?.[0]?.name) {
-      throw new ButterflySignalError({
-        name: "404_DNS_QUERY_ERROR",
-        message: `Couldn't find AtProto TXT file on ${subdomain}.${key}`,
-        cause: 'No "Answer" array in response, or Answer[0].name does not exist',
-      });
-    }
-    
-    const profile = await agent.app.bsky.actor.getProfile({actor: key})
-    if (!profile.success) {
+    const profile = await agent.app.bsky.actor.getProfile({ actor: handle });
+    if (!profile?.success) {
       throw new ButterflySignalError({
         name: "ATPROTO_GET_ERROR",
         message: `Couldn't get ${key}'s profile via AtProto`,
         cause: profile,
       });
     }
-    //console.log(profile)
-    
-    const resPro = to_mini_profile(profile);
-    console.log(resPro)
-
-    /**
-     *  At this point, we can assume the 'key' has a TXT file on _atproto.key
-     *  So we'll check if the data for this 'key' is already in local storage
-     */
-    //const cachedProfileRes = undefined; //await getCachedProfile(key);
-    
-    //  console.log(`[info]: cached data not found for ${key} ... first time, huh? ;)`);
-      
-    
+    return profile;
   } catch (err) {
     if (err instanceof ButterflySignalError) {
-      switch(err.name) {
-        case "404_DNS_QUERY_ERROR": 
+      console.warn(err.messageGen());
+    } else {
+      console.error(err);
+    }
+  }
+}
+
+async function handleMiniProfileUpdate(
+  key: string,
+  validRec: boolean
+): Promise<MiniProfile> {
+  try {
+    if (validRec) {
+      const profile = await getBskyProfile(key);
+
+      if (profile?.success) {
+        const miniProfile = to_mini_profile(profile.data);
+        CONFIG.DEBUG && console.log(miniProfile);
+        await setChromeKV(key, JSON.stringify(miniProfile));
+        CONFIG.DEBUG && console.log("[success]: updated cache with:");
+        CONFIG.DEBUG && console.dir(miniProfile, { depth: null });
+        return miniProfile;
+      }
+    }
+    CONFIG.DEBUG &&
+      console.log(
+        `[info]: No TXT rec on _atproto.${key} OR profile.success not found -> setting cache to null profile`
+      );
+
+    CONFIG.DEBUG && console.log(nullMiniProfile);
+    await setChromeKV(key, JSON.stringify(nullMiniProfile));
+    CONFIG.DEBUG && console.log("[success]: updated cache with:");
+    CONFIG.DEBUG && console.dir(nullMiniProfile, { depth: null });
+    return nullMiniProfile;
+  } catch (err) {
+    console.error(err);
+    return nullMiniProfile;
+  }
+}
+
+async function handleKey(): Promise<string | undefined> {
+  try {
+    const key = await keyFromTab();
+    CONFIG.DEBUG && console.log("key:", key);
+
+    // check if key is valid
+    if (!key || (key && key.split(".").length <= 1)) {
+      throw new ButterflySignalError({
+        name: "INVALID_KEY_ERROR",
+        message: `[400]: Oops ${key} is not a valid key!`,
+      });
+    }
+
+    return key;
+  } catch (err) {
+    if (err instanceof ButterflySignalError) {
+      console.warn(err);
+    } else {
+      console.error(err);
+    }
+    return undefined;
+  }
+}
+
+async function hasAtProtoRecord(key: string): Promise<boolean> {
+  try {
+    const subdomain = "_atproto";
+    const atProtoRes = await fetchRecord({ subdomain, hostname: key });
+
+    if (!atProtoRes?.Answer?.[0]?.name) {
+      throw new ButterflySignalError({
+        name: "404_DNS_QUERY_ERROR",
+        message: `Couldn't find AtProto TXT file on ${subdomain}.${key}`,
+        cause:
+          'No "Answer" array in response, or Answer[0].name does not exist',
+      });
+    }
+
+    return true;
+  } catch (err) {
+    if (err instanceof ButterflySignalError) {
+      console.warn(err);
+      return false;
+    }
+    console.error(err);
+    return false;
+  }
+}
+
+async function handleCached(
+  key: string,
+  hasRec: boolean
+): Promise<MiniProfile> {
+  const cachedProfileRes = await getCachedProfile(key);
+
+  if (!cachedProfileRes) {
+    CONFIG.DEBUG &&
+      console.log(
+        `[info]: cached data not found for ${key} ... first time, huh? ;)`
+      );
+    return await handleMiniProfileUpdate(key, hasRec);
+  }
+
+  const tDelta =
+    (Date.now() - new Date(cachedProfileRes.updated).getTime()) / 1000;
+
+  if (tDelta > CONFIG.REVALIDATE) {
+    CONFIG.DEBUG &&
+      console.log(
+        `[info]: ${tDelta}s > ${CONFIG.REVALIDATE}s -> profile data stale -> Revalidating cache`
+      );
+    return await handleMiniProfileUpdate(key, hasRec);
+  }
+
+  CONFIG.DEBUG &&
+    console.log(
+      `[info]: ${tDelta}s < ${CONFIG.REVALIDATE}s -> profile data still fresh -> returning cache`
+    );
+  CONFIG.DEBUG && console.log(cachedProfileRes);
+  return cachedProfileRes;
+}
+
+export async function mainHandler() {
+  try {
+    CONFIG.DEBUG && console.log("test main function");
+
+    const key = await handleKey();
+    // very important!
+    if (!key) throw new Error("Key is undefined!");
+
+    const hasRec = await hasAtProtoRecord(key);
+
+    // check cache
+    const profileData = await handleCached(key, hasRec);
+
+    if (profileData?.handle !== null) {
+      updateIcon({ isActive: true });
+      CONFIG.DEBUG && console.log("[success]: BskyData update complete");
+      return profileData;
+    }
+
+    updateIcon({ isActive: false });
+    if (CONFIG.DEBUG) console.log("[success]: null update complete");
+    return profileData;
+
+  } catch (err) {
+    if (err instanceof ButterflySignalError) {
+      switch (err.name) {
+        case "404_DNS_QUERY_ERROR":
           console.warn(err.messageGen());
           break;
         case "ATPROTO_GET_ERROR":
+          console.warn(err.messageGen());
+          break;
+        case "INVALID_KEY_ERROR":
           console.warn(err.messageGen());
           break;
         default:

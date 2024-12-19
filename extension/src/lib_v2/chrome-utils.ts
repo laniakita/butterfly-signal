@@ -28,13 +28,13 @@ export async function getChromeKV(k: string): Promise<Record<string, string>> {
 export function updateIcon({ isActive }: { isActive: boolean }) {
 	if (isActive) {
 		chrome.action.setIcon({
-			path: 'icons/active/bluesky-active-32.png'
+			path: '../../icons/active/bluesky-active-32.png'
 		});
 
 		if (CONFIG.DEBUG) console.log('[success]: set butterfly to illuminate');
 	} else {
 		chrome.action.setIcon({
-			path: 'icons/inactive/darkmode/bluesky-outline-darkmode-32.png'
+			path: '../../icons/inactive/darkmode/bluesky-outline-darkmode-32.png'
 		});
 		if (CONFIG.DEBUG) console.log('[success]: set butterfly to outline');
 	}
