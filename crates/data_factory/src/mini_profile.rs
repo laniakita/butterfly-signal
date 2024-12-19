@@ -17,9 +17,20 @@ pub fn to_mini_profile(profile_data: JsValue) -> JsValue {
     "handle"
   ];
 
+  fn is_empty(val: &JsValue) -> bool {
+    val.is_string() && val.as_string().map_or(true, |s| s.is_empty()) || val.is_null() || val.is_undefined()
+  }
+
   let mut data_vals = data_keys.iter()
     .map(|&key| {
-      let val = Reflect::get(&profile_data, &JsValue::from_str(key)).unwrap_or(JsValue::NULL);
+      let val_raw = Reflect::get(&profile_data, &JsValue::from_str(key)).unwrap_or(JsValue::NULL);
+      
+      let val = if is_empty(&val_raw) {
+        JsValue::NULL
+      } else {
+        val_raw
+      };
+
       (key, val)
     }).collect::<Vec<_>>();
   
