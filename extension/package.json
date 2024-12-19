@@ -15,8 +15,14 @@
     "@atproto/api": "^0.13.21",
     "@rsbuild/core": "^1.1.8",
     "@rsbuild/plugin-svelte": "^1.0.5",
+    "@rsdoctor/rspack-plugin": "^0.4.12",
+    "@types/bun": "^1.1.14",
     "chrome-types": "^0.1.325",
     "svelte-check": "^4.1.1",
     "typescript": "^5.7.2"
-  }
+  },
+  "packageManager": "bun@1.1.38",
+  "browserList": [
+    "last 2 chrome versions"
+  ]
 }

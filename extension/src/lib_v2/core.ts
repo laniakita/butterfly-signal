@@ -20,9 +20,10 @@
  *   b. if the returned promis is a 'null' MiniProfile, icon set inactive
  */
 
+import { agent } from "./bsky/api";
 import { getChromeKV, getCurrentTab } from "./chrome-utils";
 import { fetchRecord, hostnameFromUrl } from "./dns";
-//import { to_mini_profile } from '../../../crates/data_factory/pkg/data_factory';
+import { to_mini_profile } from '../../../crates/data_factory/pkg/data_factory';
 
 type ErrorName =
   | "INVALID_KEY_ERROR"
@@ -96,10 +97,8 @@ export async function mainHandler() {
     }
 
     const subdomain = "_atproto";
-
     const atProtoRes = await fetchRecord({ subdomain, hostname: key });
     console.log(atProtoRes);
-
     if (!atProtoRes?.Answer?.[0]?.name) {
       throw new ButterflySignalError({
         name: "404_DNS_QUERY_ERROR",
@@ -107,6 +106,19 @@ export async function mainHandler() {
         cause: 'No "Answer" array in response, or Answer[0].name does not exist',
       });
     }
+    
+    const profile = await agent.app.bsky.actor.getProfile({actor: key})
+    if (!profile.success) {
+      throw new ButterflySignalError({
+        name: "ATPROTO_GET_ERROR",
+        message: `Couldn't get ${key}'s profile via AtProto`,
+        cause: profile,
+      });
+    }
+    //console.log(profile)
+    
+    const resPro = to_mini_profile(profile);
+    console.log(resPro)
 
     /**
      *  At this point, we can assume the 'key' has a TXT file on _atproto.key
@@ -119,8 +131,15 @@ export async function mainHandler() {
     
   } catch (err) {
     if (err instanceof ButterflySignalError) {
-      if (err.name === "404_DNS_QUERY_ERROR") {
-        console.warn(err.messageGen());
+      switch(err.name) {
+        case "404_DNS_QUERY_ERROR": 
+          console.warn(err.messageGen());
+          break;
+        case "ATPROTO_GET_ERROR":
+          console.warn(err.messageGen());
+          break;
+        default:
+          console.error(err.messageGen());
       }
     } else {
       console.error(err);

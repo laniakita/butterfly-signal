@@ -18,7 +18,6 @@
     "256": "./icons/default/butterfly-signal_256.png"
   },
   "permissions": ["tabs", "webNavigation", "storage"],
-  "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "./static/js/background.js",
     "type": "module"

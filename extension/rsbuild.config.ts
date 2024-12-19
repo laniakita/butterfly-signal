@@ -20,6 +20,13 @@ export default defineConfig({
         }
         return '[name].[contenthash:8].js'
       }
+    },
+    cleanDistPath: true,
+    target: 'web'
+   },
+   performance: {
+    chunkSplit: {
+      strategy: 'all-in-one'
     }
-  }
+   }
 });
