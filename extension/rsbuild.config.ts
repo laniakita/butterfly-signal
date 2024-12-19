@@ -26,7 +26,12 @@ export default defineConfig({
    },
    performance: {
     chunkSplit: {
-      strategy: 'all-in-one'
+      strategy: 'custom',
+      splitChunks: {
+        chunks(chunk) {
+          return chunk.name !== 'background';
+        },
+      }
     }
    }
 });
