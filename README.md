@@ -1,6 +1,6 @@
 # Butterfly Signal
 
-This is a browser extension that illuminates a butterfly when you visit a webpage that has it's domain registered on Bluesky. The main libraries are written in Rust then compiled into Web Assembly for speed and cross-compatibility.
+This is a browser extension that illuminates a butterfly when you visit a webpage that has it's domain registered on Bluesky. The main libraries are written in Rust then compiled into Web Assembly ~~for speed~~ because, why not?
 
 ## Motivation
 
