@@ -9,4 +9,6 @@ pub fn to_mini_profile(profile_data: JsValue) {
 
   console::log_1(&"pretending to create mini profile from data.".into());
   console::log_1(&profile_data);
+    console::log_1(&"logged input data.".into());
+
 }

@@ -20,7 +20,23 @@
  *   b. if the returned promis is a 'null' MiniProfile, icon set inactive
  */
 
-import { getChromeKV, keyFromTab } from './chrome-utils';
+import { fetchProfile } from './bsky/utils';
+import { getChromeKV, getCurrentTab } from './chrome-utils';
+import { fetchRecord, hostnameFromUrl } from './dns';
+import { to_mini_profile } from '../../../crates/data_factory/pkg/data_factory';
+
+async function keyFromTab(): Promise<string | undefined> {
+  try {
+    const tabRes = await getCurrentTab();
+		if (tabRes?.[0] && 'url' in tabRes[0]) {
+    	const tabUrl = tabRes[0].url ?? null;
+    	const hostnameKey = hostnameFromUrl(tabUrl);
+    	return hostnameKey
+		}
+  } catch(err) {
+    console.error("[error]: Couldn't build hostname key from tab. see output:", err);
+  }
+}
 
 export async function getCachedProfile(key: string) {
   try {
@@ -45,30 +61,28 @@ export async function mainHandler() {
       throw new Error(`Oops ${key} is not a valid key!`);
     }
     console.log('trying wasm')
-    const atProtoRes = await fetch_record(key);
+    const atProtoRes = await fetchRecord({subdomain: '_atproto', hostname: key});
     console.log(atProtoRes);
-    console.log('added wasm')
-    /*
+
     if (!atProtoRes?.Answer?.[0]?.name) {
       throw new Error(`Couldn't find _atproto record on ${key}`); 
-    }*/
+    }
 
     /**
      *  At this point, we can assume the 'key' has a TXT file on _atproto.key
      *  So we'll check if the data for this 'key' is already in local storage
      */
-    /* 
     const cachedProfileRes = await getCachedProfile(key);
     
     if (!cachedProfileRes) {
       console.log(`[info]: cached data not found for ${key} ... first time, huh? ;)`);
       
-      const profileRes = await get_profile(key);
-      console.log(profileRes);
+      const profileRes = await fetchProfile(key);
+      const miniProfile =  to_mini_profile(profileRes);
+
+      console.log(miniProfile);
       
     }
-    
-    */
 
   } catch (err) {
     console.error(err);

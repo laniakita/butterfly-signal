@@ -1,6 +1,6 @@
-import { to_mini_profile } from '../../crates/data_factory/pkg'
+import { mainHandler } from "./lib_v2/core";
 
 chrome.tabs.onActivated.addListener((activeInfo) => {
   console.log(activeInfo);
-  to_mini_profile();
+  mainHandler()
 });
