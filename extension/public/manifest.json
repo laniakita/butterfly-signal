@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json.schemastore.org/chrome-manifest",
   "name": "Butterfly Signal",
   "description": "An extension that illuminates a butterfly, when it detects an active web page that has it's domain registered on Bluesky.",
   "version": "0.0.1",
@@ -19,6 +18,7 @@
     "256": "./icons/default/butterfly-signal_256.png"
   },
   "permissions": ["tabs", "webNavigation", "storage"],
+  "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "./static/js/background.js",
     "type": "module"

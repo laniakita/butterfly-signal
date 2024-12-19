@@ -20,21 +20,55 @@
  *   b. if the returned promis is a 'null' MiniProfile, icon set inactive
  */
 
-import { fetchProfile } from './bsky/utils';
-import { getChromeKV, getCurrentTab } from './chrome-utils';
-import { fetchRecord, hostnameFromUrl } from './dns';
-import { to_mini_profile } from '../../../crates/data_factory/pkg/data_factory';
+import { getChromeKV, getCurrentTab } from "./chrome-utils";
+import { fetchRecord, hostnameFromUrl } from "./dns";
+//import { to_mini_profile } from '../../../crates/data_factory/pkg/data_factory';
+
+type ErrorName =
+  | "INVALID_KEY_ERROR"
+  | "404_DNS_QUERY_ERROR"
+  | "ATPROTO_GET_ERROR";
+
+export class ButterflySignalError extends Error {
+  name: ErrorName;
+  message: string;
+  cause: unknown;
+
+  constructor({
+    name,
+    message,
+    cause,
+  }: {
+    name: ErrorName;
+    message: string;
+    cause?: unknown;
+  }) {
+    super();
+    this.name = name;
+    this.message = message;
+    this.cause = cause;
+  }
+
+  public messageGen(): string {
+    const message = `[${this.name}]: ${this.message}. ${this.cause ? `${this.cause}.` : ''}`;
+    return message
+  }
+
+}
 
 async function keyFromTab(): Promise<string | undefined> {
   try {
     const tabRes = await getCurrentTab();
-		if (tabRes?.[0] && 'url' in tabRes[0]) {
-    	const tabUrl = tabRes[0].url ?? null;
-    	const hostnameKey = hostnameFromUrl(tabUrl);
-    	return hostnameKey
-		}
-  } catch(err) {
-    console.error("[error]: Couldn't build hostname key from tab. see output:", err);
+    if (tabRes?.[0] && "url" in tabRes[0]) {
+      const tabUrl = tabRes[0].url ?? null;
+      const hostnameKey = hostnameFromUrl(tabUrl);
+      return hostnameKey;
+    }
+  } catch (err) {
+    console.error(
+      "[error]: Couldn't build hostname key from tab. see output:",
+      err
+    );
   }
 }
 
@@ -50,41 +84,46 @@ export async function getCachedProfile(key: string) {
   }
 }
 
-
 export async function mainHandler() {
   try {
-    console.log('test main function');
+    console.log("test main function");
     const key = await keyFromTab();
+    console.log(key);
 
     // check if key is valid
-    if (!key || (key && key.split('.').length <= 1)) {
-      throw new Error(`Oops ${key} is not a valid key!`);
+    if (!key || (key && key.split(".").length <= 1)) {
+      throw new Error(`[400]: Oops ${key} is not a valid key!`);
     }
-    console.log('trying wasm')
-    const atProtoRes = await fetchRecord({subdomain: '_atproto', hostname: key});
+
+    const subdomain = "_atproto";
+
+    const atProtoRes = await fetchRecord({ subdomain, hostname: key });
     console.log(atProtoRes);
 
     if (!atProtoRes?.Answer?.[0]?.name) {
-      throw new Error(`Couldn't find _atproto record on ${key}`); 
+      throw new ButterflySignalError({
+        name: "404_DNS_QUERY_ERROR",
+        message: `Couldn't find AtProto TXT file on ${subdomain}.${key}`,
+        cause: 'No "Answer" array in response, or Answer[0].name does not exist',
+      });
     }
 
     /**
      *  At this point, we can assume the 'key' has a TXT file on _atproto.key
      *  So we'll check if the data for this 'key' is already in local storage
      */
-    const cachedProfileRes = await getCachedProfile(key);
+    //const cachedProfileRes = undefined; //await getCachedProfile(key);
     
-    if (!cachedProfileRes) {
-      console.log(`[info]: cached data not found for ${key} ... first time, huh? ;)`);
+    //  console.log(`[info]: cached data not found for ${key} ... first time, huh? ;)`);
       
-      const profileRes = await fetchProfile(key);
-      const miniProfile =  to_mini_profile(profileRes);
-
-      console.log(miniProfile);
-      
-    }
-
+    
   } catch (err) {
-    console.error(err);
+    if (err instanceof ButterflySignalError) {
+      if (err.name === "404_DNS_QUERY_ERROR") {
+        console.warn(err.messageGen());
+      }
+    } else {
+      console.error(err);
+    }
   }
 }
