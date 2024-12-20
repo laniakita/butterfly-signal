@@ -5,7 +5,7 @@ export interface Config {
 
 export const DEFAULT_CONFIG: Config = {
 	REVALIDATE: 3600, // todo: change back to 3600
-	DEBUG: true // todo: change back to false
+	DEBUG: false // todo: change back to false
 };
 
 //todo function to save/update config

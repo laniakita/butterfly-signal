@@ -26,18 +26,23 @@ export async function fetchProfile(handle: string) {
   try {
 		CONFIG.DEBUG && console.log(`[info]: Fetching ${handle}'s profile from api.bsky.app`);
     const profile = await agent.app.bsky.actor.getProfile({ actor: handle });
-    if (!profile?.success) {
-      throw new ButterflySignalError({
-        name: "ATPROTO_GET_ERROR",
-        message: `Couldn't get ${handle}'s profile via AtProto`,
-        cause: profile,
-      });
+    
+		
+		if (!profile?.success) {
+      
     }
     return profile;
   } catch (err) {
-    if (err instanceof ButterflySignalError) {
-      console.warn(err.messageGen());
-    } else {
+		if (err instanceof Error && err.message === "Profile not found") {
+
+			const error = new ButterflySignalError({
+        name: "ATPROTO_GET_ERROR",
+        message: `Couldn't get ${handle}'s profile via AtProto`,
+        cause: "Profile not found",
+      });
+
+      console.error(error.messageGen());
+		} else {
       console.error(err);
     }
   }

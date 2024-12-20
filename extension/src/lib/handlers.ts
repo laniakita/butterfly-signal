@@ -22,7 +22,7 @@ export async function handleKey(): Promise<string | undefined> {
     return key;
   } catch (err) {
     if (err instanceof ButterflySignalError) {
-      console.warn(err);
+      console.error(err.messageGen());
     } else {
       console.error(err);
     }
@@ -128,7 +128,7 @@ export async function mainHandler() {
     }
   } catch (err) {
     if (err instanceof ButterflySignalError) {
-      console.warn(err.messageGen());
+      console.error(err.messageGen());
     } else {
       console.error(err);
     }

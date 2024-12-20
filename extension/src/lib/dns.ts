@@ -46,7 +46,7 @@ export async function fetchAtProtoRecord({subdomain, hostname}:{subdomain: strin
 		).then((res) => res.json());
 		return fetchTxtRes;
 	} catch (err) {
-		console.warn('[warn]: failed to get TXT record', err);
+		console.error('[error]: failed to get TXT record', err);
 	}
 }
 
@@ -67,7 +67,7 @@ export async function hasAtProtoRecord(key: string): Promise<boolean> {
     return true;
   } catch (err) {
     if (err instanceof ButterflySignalError) {
-      console.warn(err);
+      console.error(err.messageGen());
       return false;
     }
     console.error(err);
