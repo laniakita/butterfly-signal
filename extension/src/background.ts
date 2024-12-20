@@ -1,4 +1,4 @@
-import { mainHandler } from "./lib/core";
+import { mainHandler } from "./lib/handlers";
 import { CONFIG } from "./lib/config";
 
 chrome.webNavigation.onCommitted.addListener((details) => {

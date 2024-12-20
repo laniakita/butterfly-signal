@@ -1,42 +1,44 @@
 import { agent } from "./api";
 import { CONFIG } from "../config";
+import { ButterflySignalError } from "../error";
 
-interface MiniProfile {
-	handle: string | null;
-	displayName: string | null;
-	description: string | null;
-	avatar: string | null;
-	banner: string | null;
-}
+export type MiniProfile = {
+  avatar: string | null;
+  banner: string | null;
+  description: string | null;
+  displayName: string | null;
+  handle: string | null;
+  updated: Date;
+  url: string | null;
+};
 
-export interface BskyData extends MiniProfile {
-	link: string | null;
-	updated: Date;
-}
+export const nullMiniProfile: MiniProfile = {
+  avatar: null,
+  banner: null,
+  description: null,
+  displayName: null,
+  handle: null,
+  updated: new Date(),
+  url: null,
+};
 
 export async function fetchProfile(handle: string) {
-	if (CONFIG.DEBUG) console.log('[info]: attempting to fetch profile via AtProto');
-	try {
-		const res = await agent.app.bsky.actor.getProfile({ actor: handle });
-    /*
-		const data: MiniProfile = res?.data && {
-			handle: res.data.handle ?? null,
-			displayName: res.data.displayName ?? null,
-			description: res.data.description ?? null,
-			avatar: res.data.avatar ?? null,
-			banner: res.data.banner ?? null
-		};
-
-		if (CONFIG.DEBUG) {
-			console.log(`[success]: fetched ${data.displayName}'s profile`);
-			console.log(`====== begin profile ======`);
-			console.dir(data, { depth: null });
-			console.log(`======= end profile =======`);
-		}
-
-    */
-		return res;
-	} catch (err) {
-		console.warn("[warn]: couldn't fetch profile", err);
-	}
+  try {
+		CONFIG.DEBUG && console.log(`[info]: Fetching ${handle}'s profile from api.bsky.app`);
+    const profile = await agent.app.bsky.actor.getProfile({ actor: handle });
+    if (!profile?.success) {
+      throw new ButterflySignalError({
+        name: "ATPROTO_GET_ERROR",
+        message: `Couldn't get ${handle}'s profile via AtProto`,
+        cause: profile,
+      });
+    }
+    return profile;
+  } catch (err) {
+    if (err instanceof ButterflySignalError) {
+      console.warn(err.messageGen());
+    } else {
+      console.error(err);
+    }
+  }
 }

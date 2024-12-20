@@ -1,4 +1,6 @@
+import { getCurrentTab } from "./chrome-utils";
 import { CONFIG } from "./config";
+import { ButterflySignalError } from "./error";
 
 export function hostnameFromUrl(url: string | null): string | undefined {
 	try {
@@ -15,7 +17,23 @@ export function hostnameFromUrl(url: string | null): string | undefined {
 	}
 }
 
-export async function fetchRecord({subdomain, hostname}:{subdomain: string, hostname: string}) {
+export async function keyFromTab(): Promise<string | undefined> {
+  try {
+    const tabRes = await getCurrentTab();
+    if (tabRes?.[0] && "url" in tabRes[0]) {
+      const tabUrl = tabRes[0].url ?? null;
+      const hostnameKey = hostnameFromUrl(tabUrl);
+      return hostnameKey;
+    }
+  } catch (err) {
+    console.error(
+      "[error]: Couldn't build hostname key from tab. see output:",
+      err
+    );
+  }
+}
+
+export async function fetchAtProtoRecord({subdomain, hostname}:{subdomain: string, hostname: string}) {
 	if (CONFIG.DEBUG) console.log(`[info]: searching for TXT record on _atproto.${hostname}`);
 	try {
 		const fetchTxtRes = fetch(
@@ -32,3 +50,27 @@ export async function fetchRecord({subdomain, hostname}:{subdomain: string, host
 	}
 }
 
+export async function hasAtProtoRecord(key: string): Promise<boolean> {
+  try {
+    const subdomain = "_atproto";
+    const atProtoRes = await fetchAtProtoRecord({ subdomain, hostname: key });
+
+    if (!atProtoRes?.Answer?.[0]?.name) {
+      throw new ButterflySignalError({
+        name: "404_DNS_QUERY_ERROR",
+        message: `Couldn't find AtProto TXT file on ${subdomain}.${key}`,
+        cause:
+          'No "Answer" array in response, or Answer[0].name does not exist',
+      });
+    }
+
+    return true;
+  } catch (err) {
+    if (err instanceof ButterflySignalError) {
+      console.warn(err);
+      return false;
+    }
+    console.error(err);
+    return false;
+  }
+}
