@@ -4,8 +4,16 @@
   import { mainHandler } from "./lib/handlers";
 
   let title = $state("No Bsky profile detected.");
+  let profileUrl = $state("");
   let miniProfileData: MiniProfile = $state(nullMiniProfile);
   let shouldDisplayProfile = $state(false);
+
+  function handleLink(link: string) {
+    const opts = {
+      url: link,
+    };
+    chrome.tabs.create(opts);
+  }
 
   $effect(() => {
     (async () => {
@@ -13,6 +21,7 @@
       if (miniProfileData.handle !== null) {
         title = miniProfileData.handle;
         shouldDisplayProfile = true;
+        profileUrl = `https://bsky.app/profile/${miniProfileData.handle}`;
       } else {
         const hostname = await keyFromTab();
         title = `${hostname} doesn't have a profile on bsky.app`;
@@ -26,17 +35,15 @@
   class="w-[20rem] min-h-[30rem] bg-black text-slate-300 flex flex-col justify-start items-center overflow-hidden"
 >
   {#if shouldDisplayProfile && miniProfileData.banner !== null}
-    <div class="">
-      <img
-        src={miniProfileData.banner}
-        alt="{miniProfileData.displayName ?? miniProfileData.handle}'s banner"
-        class="w-full h-56 object-cover"
-      />
-    </div>
+    <img
+      src={miniProfileData.banner}
+      alt="{miniProfileData.displayName ?? miniProfileData.handle}'s banner"
+      class="w-full h-56 object-cover"
+    />
   {/if}
 
   {#if shouldDisplayProfile}
-    <div class="relative ">
+    <div class="relative">
       <div class="backdrop"></div>
       <div class="backdrop-edge"></div>
 
@@ -46,26 +53,32 @@
           : 'pt-14'} flex flex-col justify-center items-center gap-y-4 h-full"
       >
         <div
-          class="flex flex-col justify-center {miniProfileData.description? 'items-start' :'items-center'} gap-y-1 text-slate-400"
+          class="flex flex-col justify-center {miniProfileData.description
+            ? 'items-start'
+            : 'items-center'} gap-y-1 text-slate-400"
         >
-          <img
-            src={miniProfileData.avatar}
-            alt="{miniProfileData.displayName ??
-              miniProfileData.handle} profile"
-            class="w-20 h-20 rounded-full border-2 border-slate-300"
-          />
-
+          <button onclick={() => handleLink(profileUrl)} class="relative">
+            <img
+              src={miniProfileData.avatar}
+              alt="{miniProfileData.displayName ??
+                miniProfileData.handle} profile"
+              class="w-20 h-20 rounded-full border-2 border-slate-300 hover:border-blue-500"
+            />
+          </button>
           <h1 class="text-2xl font-semibold text-slate-200">
             {miniProfileData.displayName}
           </h1>
-          <button class="hover:text-blue-500 hover:underline">
+          <button
+            class="hover:text-blue-500 hover:underline"
+            onclick={() => handleLink(profileUrl)}
+          >
             <h2 class="{miniProfileData.displayName ? '' : 'mt-2'} text-base">
               @{miniProfileData.handle}
             </h2>
           </button>
           <p class="text-sm">{miniProfileData.description}</p>
         </div>
-        
+
         <button
           class="bg-blue-500 text-blue-200 rounded-full w-full min-h-10 py-2 border border-blue-200 hover:border-blue-800 text-center font-mono font-semibold hover:bg-blue-300 hover:text-blue-800 px-4 text-balance"
         >
@@ -80,7 +93,6 @@
       <h3 class="text-lg">{title}</h3>
     </div>
   {/if}
-
 </main>
 
 <style>
@@ -94,7 +106,7 @@
     pointer-events: none;
   }
   .backdrop-edge {
-    --thickness: 6px;
+    --thickness: 4px;
     position: absolute;
     inset: 0;
     height: 100%;
@@ -107,5 +119,6 @@
       black var(--thickness),
       transparent var(--thickness)
     );
+    pointer-events: none;
   }
 </style>
