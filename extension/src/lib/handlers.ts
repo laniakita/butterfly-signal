@@ -15,7 +15,7 @@ export async function handleKey(): Promise<string | undefined> {
     if (!key || (key && key.split(".").length <= 1)) {
       throw new ButterflySignalError({
         name: "INVALID_KEY_ERROR",
-        message: `[400]: Oops ${key} is not a valid key!`,
+        message: `Oops ${key} is not a valid key!`,
       });
     }
 
