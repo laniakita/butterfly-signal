@@ -1,5 +1,5 @@
-import { mainHandler } from "./lib_v2/core";
-import { CONFIG } from "./lib_v2/config";
+import { mainHandler } from "./lib/core";
+import { CONFIG } from "./lib/config";
 
 chrome.webNavigation.onCommitted.addListener((details) => {
   CONFIG.DEBUG && console.log("trying from onCommited call.");

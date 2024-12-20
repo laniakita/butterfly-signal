@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "@atproto/api": "^0.13.21",
-    "@rsbuild/core": "^1.1.8",
+    "@rsbuild/core": "^1.1.10",
     "@rsbuild/plugin-svelte": "^1.0.5",
     "@rsdoctor/rspack-plugin": "^0.4.12",
     "@types/bun": "^1.1.14",
