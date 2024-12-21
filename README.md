@@ -10,12 +10,11 @@ I liked [@bradgessler's](https://bsky.app/profile/bradgessler.com) idea so much,
 
 ## Usage
 
-> ### WIP: 12/20/2024
-> This project is currently at the *experimental prototype* stage. As such, you'll have to compile the extension yourself, and load the unpacked './extension/dist' into a chromium browser with "Developer Mode" enabled. Pre-compiled binaries will be made available for distribution once the core features are implemented and semi-polished.
->
-> To compile the project, see the [contributing](#contributing) prequisites down below for the necessary libraries, and run `bun run build` from within the extension directory, to generate a unpacked *./dist* you can load into a Chromium browser.
+### WIP: 12/20/2024
 
-Until this is made available on the chrome webstore (or whereever you get browser extensions), you'll have to download the latest release, and load it into your browser.
+This project is currently at the *early, experimental prototype* stage. As such, you'll have to compile the extension yourself, and load the unpacked './extension/dist' into a chromium browser with "Developer Mode" enabled. Pre-compiled binaries will be made available for distribution once the core features are implemented and semi-polished.
+
+To compile the project, see the [contributing](#contributing) prequisites down below for the necessary libraries, and run `bun run build` from within the extension directory, to generate a unpacked *./dist* you can load into a Chromium browser.
 
 ## Roadmap
 
