@@ -21,13 +21,14 @@ To compile the project, see the [contributing](#contributing) prequisites down b
 ```shell
 ❯ wasm-pack build ./crates/data_factory -t bundler --scope butterfly-signal 
 ❯ cd ./extension
+❯ bun i
 ❯ bun run build
 ```
 
 You can also one-line-it for convenience:
 
 ```shell
-❯ wasm-pack build ./crates/data_factory -t bundler --scope butterfly-signal && cd ./extension && bun run build
+❯ wasm-pack build ./crates/data_factory -t bundler --scope butterfly-signal && cd ./extension && bun i && bun run build
 ```
 
 The above will generate a unpacked *./dist* you can load into a Chromium based browser.
