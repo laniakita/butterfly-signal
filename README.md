@@ -14,7 +14,7 @@ The popup uses Svelte, while the logic is written with a combo of TypeScript (fo
 
 ### IMPORTANT! THIS EXTENSION IS A WIP AS OF 12/20/2024
 
-This project is currently at the *early-experimental prototype* stage. As such, you'll have to compile the extension yourself, and load the unpacked './extension/dist' into a chromium browser with "Developer Mode" enabled. Pre-compiled binaries will be made available for distribution once the core features are implemented and semi-polished.
+This project is currently at the *early-experimental prototype* stage. As such, you'll have to compile the extension yourself, and load the unpacked './extension/dist' into a chromium browser with "Developer Mode" enabled. Pre-compiled binaries will be made available for distribution the minute core features are implemented and semi-polished.
 
 To compile the project, see the [contributing](#contributing) prequisites down below for the necessary libraries, then run the following:
 
