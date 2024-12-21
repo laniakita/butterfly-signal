@@ -79,7 +79,7 @@ I've been learning Rust recently, and wanted to create something that would brin
 >#### Prerequisites
 >
 >0. Install required libraries into your environment:
->    - **Rust:** rustc, rustup, and cargo
+>    - **Rust:** rustc, rustup, cargo, and wasm-pack
 >    - **JS:** nodejs, bun.sh
 
 1. Fork this repo
