@@ -1,6 +1,6 @@
-# Butterfly Signal
+# Butterfly Signal [WIP]
 
-This is a browser extension that illuminates a butterfly when you visit a webpage that has it's domain registered on Bluesky. The main libraries are written in Rust then compiled into Web Assembly ~~for speed~~ because, why not?
+This is a work in progress browser extension that illuminates a butterfly when you visit a webpage that has it's domain registered on Bluesky. The main libraries are written in Rust then compiled into Web Assembly ~~for speed~~ because, why not?
 
 ## Motivation
 
@@ -10,13 +10,18 @@ I liked [@bradgessler's](https://bsky.app/profile/bradgessler.com) idea so much,
 
 ## Usage
 
+> ### WIP: 12/20/2024
+> This project is currently at the *experimental prototype* stage. As such, you'll have to compile the extension yourself, and load the unpacked './extension/dist' into a chromium browser with "Developer Mode" enabled. Pre-compiled binaries will be made available for distribution once the core features are implemented and semi-polished.
+>
+> To compile the project, see the [contributing](#contributing) prequisites down below for the necessary libraries, and run `bun run build` from within the extension directory, to generate a unpacked *./dist* you can load into a Chromium browser.
+
 Until this is made available on the chrome webstore (or whereever you get browser extensions), you'll have to download the latest release, and load it into your browser.
 
 ## Roadmap
 
 ### Browser Support
 
-- [ ] Chromium Compatibility
+- [ ] Chromium Compatibility (WIP)
 - [ ] Firefox Compatibility
 - [ ] Safari Compatibility
 
