@@ -81,6 +81,7 @@
 
         <button
           class="bg-blue-500 text-blue-200 rounded-full w-full min-h-10 py-2 border border-blue-200 hover:border-blue-800 text-center font-mono font-semibold hover:bg-blue-300 hover:text-blue-800 px-4 text-balance"
+          onclick={() => handleLink(profileUrl)}
         >
           follow <span class="whitespace-nowrap"
             >{miniProfileData.displayName ?? miniProfileData.handle}</span
